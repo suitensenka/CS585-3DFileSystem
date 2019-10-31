@@ -16,12 +16,12 @@ public class CameraControl : MonoBehaviour
     float rotationY = 0.0f;
     float rotationX = 0.0f;
 
-    float yMod;
+    public float yMod;
 
     // Start is called before the first frame update
     void Start()
     {
-        yMod = transform.gameObject.GetComponent<MyFileSystem>().heightModifier;
+        //yMod = transform.gameObject.GetComponent<MyFileSystem>().heightModifier;
     }
 
     private float speed = 2.0f;
@@ -80,11 +80,14 @@ public class CameraControl : MonoBehaviour
         }
         if (Input.GetKey(KeyCode.D))
         {
-            transform.Rotate(0.0f, -(1f +speed * Time.deltaTime), yMod, Space.World);
+            transform.Rotate(0.0f, -(1f +speed * Time.deltaTime), 0.0f, Space.World);
+            transform.Translate(new Vector3(0.0f, yMod, 0.0f)*Time.deltaTime);
+
         }
         if (Input.GetKey(KeyCode.A))
         {
-            transform.Rotate(0.0f, 1f + speed * Time.deltaTime, yMod, Space.World);
+            transform.Rotate(0.0f, 1f + speed * Time.deltaTime, 0.0f, Space.World);
+            transform.Translate(new Vector3(0.0f, -yMod, 0.0f)*Time.deltaTime);
         }
     }
 }

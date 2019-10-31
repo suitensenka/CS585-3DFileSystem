@@ -163,9 +163,9 @@ public class DataNode : MonoBehaviour
    
                         degree = degree + degreeModifier;
 
-                        //var gObj = Instantiate(DoorPrefab); //Need to normalize the object in blender or whatever program before importing
+                        var gObj = Instantiate(DoorPrefab); //Need to normalize the object in blender or whatever program before importing
                         
-                        var gObj = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                        //var gObj = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                         gObj.transform.position = new Vector3(x + transform.position.x, y + heightModifier * i, z + transform.position.z);
 
 
