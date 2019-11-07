@@ -21,7 +21,13 @@ public class MouseClick : MonoBehaviour, IPointerDownHandler
             clickStart = 0;
             Debug.Log("Double click detected");
         } 
-        else if(clicks > 2 || Time.time - clickStart > delay)
+        else if(clicks == 1 && (Time.time - clickStart) > delay)
+        {
+            clicks = 0;
+            clickStart = 0;
+            Debug.Log("Single Click");
+        }
+        else if(Time.time - clickStart > delay)
         {
             clicks = 0;
             clickStart = 0;
