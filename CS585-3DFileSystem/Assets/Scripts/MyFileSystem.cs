@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+using TMPro;
+
 
 public class MyFileSystem : MonoBehaviour
 {
@@ -15,15 +17,22 @@ public class MyFileSystem : MonoBehaviour
 
     public GameObject ActiveFolder;
     public GameObject InactiveFolder;
-    public GameObject DoorPrefab;
 
+    //PREFABS
+    public GameObject DoorPrefab, TextMeshProPrefab;
     public float degree, degreeModifier, radius, heightModifier; //control how large the helix is.
+
+
+    public bool IsWheel = false;
+    public bool IsHelix = true;
+    private float wheelY;
 
     public DataNode currentSelectedNode;
 
     // Start is called before the first frame update
     void Start()
     {
+        wheelY = transform.position.y - 5f;
         txtSelectedNode.text = "";
         txtHoveredOverNode.text = "";
 
@@ -55,12 +64,17 @@ public class MyFileSystem : MonoBehaviour
             dn.ParentObject = InactiveFolder;
             dn.CurrentPosition = gObj.transform.position;
 
+            var textName = Instantiate(TextMeshProPrefab, gObj.transform);
+            textName.transform.localScale = new Vector3(1f, 1f, 1f);
+            textName.GetComponent<TextMeshPro>().text = dn.Name;
+            textName.transform.SetParent(gObj.transform);
+
             index += 3f;
         }
     }
 
     RaycastHit hitInfo = new RaycastHit();
-    
+
     void Update()
     {
         #region HANDLE MOUSE INTERACTION
@@ -87,21 +101,30 @@ public class MyFileSystem : MonoBehaviour
 
             // Create a raycase from the screen-space into World Space, store the data in hitInfo Object
             bool hit = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo);
-            if(hit)
+            if (hit)
             {
-                if(!InactiveFolder.activeSelf)
+                if (!InactiveFolder.activeSelf)
                     InactiveFolder.SetActive(false);
-                if(hitInfo.transform.GetComponent<DataNode>()!=null)
+                if (hitInfo.transform.GetComponent<DataNode>() != null)
                 {
                     transform.position = hitInfo.transform.position;
-                    // if there is a hit, we want to get the DataNode component to extract the information
+                    if (IsWheel)
+                    {
+                        transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
+                        transform.position = new Vector3(transform.position.x, wheelY, transform.position.z);
+                    }
+                    else if (IsHelix)
+                    {
+                        transform.rotation = Quaternion.identity;
+                        transform.position = hitInfo.transform.position;
+                    }                    // if there is a hit, we want to get the DataNode component to extract the information
                     DataNode dn = hitInfo.transform.GetComponent<DataNode>();
 
-                    if(dn.IsFolder && !dn.IsExpanded)
+                    if (dn.IsFolder && !dn.IsExpanded)
                     {
                         DirectoryInfo diTop = new DirectoryInfo(dn.FullName);
                         int samples = diTop.GetDirectories("*").Length;
-                        dn.gameObject.transform.Translate(Vector3.forward * -(samples%2)*1.5f, Space.Self);
+                        dn.gameObject.transform.Translate(Vector3.forward * -(samples % 2) * 1.5f, Space.Self);
 
                         //dn.NewPosition = (Vector3.forward * (samples % 2));
                         //dn.Move = true;
@@ -111,15 +134,15 @@ public class MyFileSystem : MonoBehaviour
 
 
                         diTop = null;
-                        
+
                     }
 
                     txtSelectedNode.text = $"Selected Node: {dn.FullName} Size Is: {dn.Size}";
                     dn.IsSelected = true;
 
-                    if(!dn.IsExpanded)
-                        dn.ProcessNode(DoorPrefab, degree, degreeModifier, radius, heightModifier);
-                    if(dn.IsFolder|dn.IsDrive)
+                    if (!dn.IsExpanded)
+                        dn.ProcessNode(DoorPrefab, TextMeshProPrefab, degree, degreeModifier, radius, heightModifier, IsHelix, IsWheel);
+                    if (dn.IsFolder | dn.IsDrive)
                     {
                         dn.IsExpanded = true;
                         dn.gameObject.transform.SetParent(ActiveFolder.transform);
@@ -133,11 +156,11 @@ public class MyFileSystem : MonoBehaviour
                     {
                         currentSelectedNode.transform.position = currentSelectedNode.CurrentPosition;
                         currentSelectedNode.transform.GetChild(0).gameObject.SetActive(true);
-                        if(!currentSelectedNode.FullName.Equals(dn.FullName))
+                        if (!currentSelectedNode.FullName.Equals(dn.FullName))
                             currentSelectedNode.transform.SetParent(currentSelectedNode.ParentObject.transform.GetChild(0));
                         currentSelectedNode.IsSelected = false;
                         currentSelectedNode = dn;
-                        if(dn.IsExpanded)
+                        if (dn.IsExpanded)
                         {
                             currentSelectedNode.transform.GetChild(0).gameObject.SetActive(true);
                         }
@@ -150,9 +173,9 @@ public class MyFileSystem : MonoBehaviour
 
     public void GoBackUp()
     {
-        if(!currentSelectedNode.IsDrive)
+        if (!currentSelectedNode.IsDrive)
         {
-            
+
             currentSelectedNode.transform.GetChild(0).gameObject.SetActive(false);
             currentSelectedNode.transform.position = currentSelectedNode.CurrentPosition;
             currentSelectedNode.transform.SetParent(currentSelectedNode.ParentObject.transform.GetChild(0));
@@ -164,8 +187,81 @@ public class MyFileSystem : MonoBehaviour
             currentSelectedNode.ParentObject.transform.position = currentSelectedNode.ParentObject.transform.GetComponent<DataNode>().CurrentPosition;
 
             currentSelectedNode = currentSelectedNode.ParentObject.transform.GetComponent<DataNode>();
-            
+
             transform.position = currentSelectedNode.transform.position;
         }
+    }
+
+
+    public void SwitchHelix()
+    {
+        if (!IsHelix)
+        {
+            IsHelix = true;
+            IsWheel = false;
+
+            int i = 0;
+            try
+            {
+                foreach (Transform child in currentSelectedNode.transform.GetChild(0))
+                {
+                    i++;
+                    float x = radius * Mathf.Cos(degree);
+                    float z = radius * Mathf.Sin(degree);
+                    float y = currentSelectedNode.transform.position.y;
+
+                    degree = degree + degreeModifier;
+                    child.position = new Vector3(x + currentSelectedNode.transform.position.x, y + heightModifier * i, z + currentSelectedNode.transform.position.z);
+                    Vector3 newRotate = new Vector3(transform.position.x, child.transform.position.y, transform.position.z);
+                    child.transform.LookAt(newRotate);
+                }
+            }
+            catch
+            {
+
+            }
+        }
+
+    }
+
+    public void SwitchWheel()
+    {
+        if (!IsWheel)
+        {
+            IsHelix = false;
+            IsWheel = true;
+            transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
+            transform.position = new Vector3(transform.position.x, wheelY, transform.position.z);
+
+            int i = 0;
+            float prev = 0f;
+            try
+            {
+                foreach (Transform child in currentSelectedNode.transform.GetChild(0))
+                {
+                    i++;
+                    float temp = (float)degree / (float)(2f * Math.PI);
+                    if (Mathf.Floor(temp) > prev)
+                    {
+                        prev = Mathf.Floor(temp);
+                        radius = radius + Mathf.Floor(temp);
+                    }
+                    float x = radius * Mathf.Cos(degree);
+                    float z = radius * Mathf.Sin(degree);
+                    float y = currentSelectedNode.transform.position.y;
+
+                    degree = degree + degreeModifier;
+                    child.position = new Vector3(x + currentSelectedNode.transform.position.x, y, z + currentSelectedNode.transform.position.z);
+                    //Vector3 newRotate = new Vector3(transform.position.x, child.transform.position.y, transform.position.z);
+                    child.transform.LookAt(transform);
+                }
+            }
+            catch
+            {
+
+            }
+        }
+
+
     }
 }

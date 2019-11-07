@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 using UnityEngine;
+using TMPro;
 
 public class DataNode : MonoBehaviour
 {
@@ -22,6 +23,7 @@ public class DataNode : MonoBehaviour
 
     public Vector3 CurrentPosition; //Store the current position to replace it into the view later
     public GameObject ParentObject; //cache the parent object so we can move it back
+    
 
     //drive.AvailableFreeSpace; 
     //drive.TotalFreeSpace;
@@ -36,9 +38,11 @@ public class DataNode : MonoBehaviour
     public int lengthOfLineRenderer = 2;
 
     Transform parentNode;
+    private MyFileSystem fsscript;
 
-    public void ProcessNode(GameObject DoorPrefab, float degree = 0.0f, float degreeModifier = 0.2f, float radius = 5.0f, float heightModifier = 5.0f)
+    public void ProcessNode(GameObject DoorPrefab, GameObject TextMeshProPrefab, float degree, float degreeModifier, float radius, float heightModifier, bool IsHelix, bool IsWheel)
     {
+        //fsscript = transform.gameObject.GetComponent<MyFileSystem>();
         if (IsFolder || IsDrive)
         {
             // let's expand ...
@@ -51,11 +55,14 @@ public class DataNode : MonoBehaviour
             {
                 //This is here to easily hide object that are not in the current directory.
                 if (IsExpanded)
+                {
                     HideExpanded = ParentObject.transform.GetChild(0).gameObject;
+                }
                 else
                 {
                     HideExpanded = new GameObject("HideExpanded");
                     HideExpanded.transform.SetParent(transform);
+                    HideExpanded.transform.SetSiblingIndex(0); //ensure that it is always at position 0
                 }
 
                 int samples = diTop.GetDirectories("*").Length;
@@ -110,7 +117,7 @@ public class DataNode : MonoBehaviour
 
                         gObj.transform.SetParent(HideExpanded.transform);
                         gObj.name = fi.FullName;
-                        gObj.transform.LookAt(transform);
+                        
 
                         gObj.AddComponent<DataNode>();
                         DataNode dn = gObj.GetComponent<DataNode>();
@@ -122,6 +129,22 @@ public class DataNode : MonoBehaviour
                         //Storing information later to restore their original position in the helix
                         dn.ParentObject = transform.gameObject;
                         dn.CurrentPosition = gObj.transform.position;
+
+                        var textName = Instantiate(TextMeshProPrefab, gObj.transform);
+                        textName.GetComponent<TextMeshPro>().text = dn.Name;
+                        textName.transform.SetParent(gObj.transform);
+                        textName.transform.localScale *= 0.2f;
+
+                        if(IsHelix)
+                        {
+                            Vector3 newRotate = new Vector3(transform.position.x, gObj.transform.position.y, transform.position.z );
+                            gObj.transform.LookAt(newRotate);
+                        }
+
+                        else if(IsWheel)
+                        {
+                            gObj.transform.LookAt(transform);
+                        }
 
 
                         /*    c1 = transform.GetComponent<Renderer>().material.color;
@@ -163,14 +186,13 @@ public class DataNode : MonoBehaviour
    
                         degree = degree + degreeModifier;
 
-                        //var gObj = Instantiate(DoorPrefab); //Need to normalize the object in blender or whatever program before importing
+                        var gObj = Instantiate(DoorPrefab); //Need to normalize the object in blender or whatever program before importing
                         
-                        var gObj = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                        //var gObj = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                         gObj.transform.position = new Vector3(x + transform.position.x, y + heightModifier * i, z + transform.position.z);
 
 
                         gObj.transform.SetParent(HideExpanded.transform);
-                        gObj.transform.LookAt(transform);
                         //gObj.transform.Rotate(-90f,0,0);
                         //gObj.transform.Translate(Vector3.forward * -(samples%2), Space.Self);
                         parentNode = transform;
@@ -197,6 +219,23 @@ public class DataNode : MonoBehaviour
                         //Storing information later to restore their original position in the helix
                         dn.ParentObject = transform.gameObject;
                         dn.CurrentPosition = gObj.transform.position;
+
+                        var textName = Instantiate(TextMeshProPrefab, gObj.transform);
+                        textName.GetComponent<TextMeshPro>().text = dn.Name;
+                        textName.transform.SetParent(gObj.transform);
+
+                        
+
+                        if(IsHelix)
+                        {
+                            Vector3 newRotate = new Vector3(transform.position.x, gObj.transform.position.y, transform.position.z );
+                            gObj.transform.LookAt(newRotate);
+                        }
+
+                        else if(IsWheel)
+                        {
+                            gObj.transform.LookAt(transform);
+                        }
 
                         //c1 = transform.GetComponent<Renderer>().material.color;
                         //c2 = new Color(x, y, z);
@@ -230,6 +269,7 @@ public class DataNode : MonoBehaviour
 
     int ProcessFiles(DirectoryInfo diTop, int i)
     {
+        fsscript = transform.gameObject.GetComponent<MyFileSystem>();
         int samples = diTop.GetDirectories("*").Length;
         float rnd = 1;
         bool randomize = true;
