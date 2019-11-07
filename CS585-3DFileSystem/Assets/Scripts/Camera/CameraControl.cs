@@ -17,11 +17,13 @@ public class CameraControl : MonoBehaviour
     float rotationX = 0.0f;
 
     public float yMod;
+    private MyFileSystem fsscript;
 
     // Start is called before the first frame update
     void Start()
     {
         //yMod = transform.gameObject.GetComponent<MyFileSystem>().heightModifier;
+        fsscript = transform.gameObject.GetComponent<MyFileSystem>();
     }
 
     private float speed = 2.0f;
@@ -70,24 +72,57 @@ public class CameraControl : MonoBehaviour
         //     transform.Rotate(Vector3.up, 10 * speed * Time.deltaTime);
         // }
 
-        if (Input.GetKey(KeyCode.W))
+        if (fsscript.IsHelix)
         {
-            transform.Translate(Vector3.up * speed * Time.deltaTime);
-        }
-        if (Input.GetKey(KeyCode.S))
-        {
-            transform.Translate(-Vector3.up * speed * Time.deltaTime);
-        }
-        if (Input.GetKey(KeyCode.D))
-        {
-            transform.Rotate(0.0f, -(1f +speed * Time.deltaTime), 0.0f, Space.World);
-            transform.Translate(new Vector3(0.0f, yMod, 0.0f)*Time.deltaTime);
+            if (Input.GetKey(KeyCode.W))
+            {
+                transform.Translate(Vector3.up * speed * Time.deltaTime);
+            }
+            if (Input.GetKey(KeyCode.S))
+            {
+                transform.Translate(-Vector3.up * speed * Time.deltaTime);
+            }
+            if (Input.GetKey(KeyCode.D))
+            {
+                transform.Rotate(0.0f, -(1f + speed * Time.deltaTime), 0.0f, Space.World);
+                transform.Translate(new Vector3(0.0f, yMod, 0.0f) * Time.deltaTime);
 
+            }
+            if (Input.GetKey(KeyCode.A))
+            {
+                transform.Rotate(0.0f, 1f + speed * Time.deltaTime, 0.0f, Space.World);
+                transform.Translate(new Vector3(0.0f, -yMod, 0.0f) * Time.deltaTime);
+            }
         }
-        if (Input.GetKey(KeyCode.A))
+
+        else if (fsscript.IsWheel)
         {
-            transform.Rotate(0.0f, 1f + speed * Time.deltaTime, 0.0f, Space.World);
-            transform.Translate(new Vector3(0.0f, -yMod, 0.0f)*Time.deltaTime);
+            if (Input.GetKey(KeyCode.W))
+            {
+                transform.Translate(Vector3.forward * speed * Time.deltaTime);
+            }
+            if (Input.GetKey(KeyCode.S))
+            {
+                transform.Translate(-Vector3.forward * speed * Time.deltaTime);
+            }
+            if (Input.GetKey(KeyCode.Q))
+            {
+                transform.Rotate(0.0f, -(1f + speed * Time.deltaTime), 0.0f, Space.World);
+
+            }
+            if (Input.GetKey(KeyCode.E))
+            {
+                transform.Rotate(0.0f, 1f + speed * Time.deltaTime, 0.0f, Space.World);
+            }
+            if (Input.GetKey(KeyCode.D))
+            {
+                transform.Translate(-Vector3.left * speed * Time.deltaTime);
+            }
+            if (Input.GetKey(KeyCode.A))
+            {
+                transform.Translate(Vector3.left * speed * Time.deltaTime);
+            }
+
         }
     }
 }

@@ -25,12 +25,14 @@ public class MyFileSystem : MonoBehaviour
 
     public bool IsWheel = false;
     public bool IsHelix = true;
+    private float wheelY;
 
     public DataNode currentSelectedNode;
 
     // Start is called before the first frame update
     void Start()
     {
+        wheelY = transform.position.y - 5f;
         txtSelectedNode.text = "";
         txtHoveredOverNode.text = "";
 
@@ -106,7 +108,16 @@ public class MyFileSystem : MonoBehaviour
                 if (hitInfo.transform.GetComponent<DataNode>() != null)
                 {
                     transform.position = hitInfo.transform.position;
-                    // if there is a hit, we want to get the DataNode component to extract the information
+                    if (IsWheel)
+                    {
+                        transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
+                        transform.position = new Vector3(transform.position.x, wheelY, transform.position.z);
+                    }
+                    else if (IsHelix)
+                    {
+                        transform.rotation = Quaternion.identity;
+                        transform.position = hitInfo.transform.position;
+                    }                    // if there is a hit, we want to get the DataNode component to extract the information
                     DataNode dn = hitInfo.transform.GetComponent<DataNode>();
 
                     if (dn.IsFolder && !dn.IsExpanded)
@@ -130,7 +141,7 @@ public class MyFileSystem : MonoBehaviour
                     dn.IsSelected = true;
 
                     if (!dn.IsExpanded)
-                        dn.ProcessNode(DoorPrefab, TextMeshProPrefab, degree, degreeModifier, radius, heightModifier);
+                        dn.ProcessNode(DoorPrefab, TextMeshProPrefab, degree, degreeModifier, radius, heightModifier, IsHelix, IsWheel);
                     if (dn.IsFolder | dn.IsDrive)
                     {
                         dn.IsExpanded = true;
@@ -219,6 +230,8 @@ public class MyFileSystem : MonoBehaviour
         {
             IsHelix = false;
             IsWheel = true;
+            transform.rotation = Quaternion.Euler(-90f, 0f, 0f);
+            transform.position = new Vector3(transform.position.x, wheelY, transform.position.z);
 
             int i = 0;
             float prev = 0f;
@@ -228,10 +241,10 @@ public class MyFileSystem : MonoBehaviour
                 {
                     i++;
                     float temp = (float)degree / (float)(2f * Math.PI);
-                    if (Mathf.Round(temp) > prev)
+                    if (Mathf.Floor(temp) > prev)
                     {
-                        prev = Mathf.Round(temp);
-                        radius = radius * Mathf.Round(temp);
+                        prev = Mathf.Floor(temp);
+                        radius = radius + Mathf.Floor(temp);
                     }
                     float x = radius * Mathf.Cos(degree);
                     float z = radius * Mathf.Sin(degree);
@@ -239,8 +252,8 @@ public class MyFileSystem : MonoBehaviour
 
                     degree = degree + degreeModifier;
                     child.position = new Vector3(x + currentSelectedNode.transform.position.x, y, z + currentSelectedNode.transform.position.z);
-                    Vector3 newRotate = new Vector3(transform.position.x, child.transform.position.y, transform.position.z);
-                    child.transform.LookAt(newRotate);
+                    //Vector3 newRotate = new Vector3(transform.position.x, child.transform.position.y, transform.position.z);
+                    child.transform.LookAt(transform);
                 }
             }
             catch

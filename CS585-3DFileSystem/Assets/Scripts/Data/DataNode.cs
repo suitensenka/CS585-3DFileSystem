@@ -38,9 +38,11 @@ public class DataNode : MonoBehaviour
     public int lengthOfLineRenderer = 2;
 
     Transform parentNode;
+    private MyFileSystem fsscript;
 
-    public void ProcessNode(GameObject DoorPrefab, GameObject TextMeshProPrefab, float degree = 0.0f, float degreeModifier = 0.2f, float radius = 5.0f, float heightModifier = 5.0f)
+    public void ProcessNode(GameObject DoorPrefab, GameObject TextMeshProPrefab, float degree, float degreeModifier, float radius, float heightModifier, bool IsHelix, bool IsWheel)
     {
+        //fsscript = transform.gameObject.GetComponent<MyFileSystem>();
         if (IsFolder || IsDrive)
         {
             // let's expand ...
@@ -133,8 +135,16 @@ public class DataNode : MonoBehaviour
                         textName.transform.SetParent(gObj.transform);
                         textName.transform.localScale *= 0.2f;
 
-                        Vector3 newRotate = new Vector3(transform.position.x, gObj.transform.position.y, transform.position.z );
-                        gObj.transform.LookAt(newRotate);
+                        if(IsHelix)
+                        {
+                            Vector3 newRotate = new Vector3(transform.position.x, gObj.transform.position.y, transform.position.z );
+                            gObj.transform.LookAt(newRotate);
+                        }
+
+                        else if(IsWheel)
+                        {
+                            gObj.transform.LookAt(transform);
+                        }
 
 
                         /*    c1 = transform.GetComponent<Renderer>().material.color;
@@ -214,8 +224,18 @@ public class DataNode : MonoBehaviour
                         textName.GetComponent<TextMeshPro>().text = dn.Name;
                         textName.transform.SetParent(gObj.transform);
 
-                        Vector3 newRotate = new Vector3(transform.position.x, gObj.transform.position.y, transform.position.z );
-                        gObj.transform.LookAt(newRotate);
+                        
+
+                        if(IsHelix)
+                        {
+                            Vector3 newRotate = new Vector3(transform.position.x, gObj.transform.position.y, transform.position.z );
+                            gObj.transform.LookAt(newRotate);
+                        }
+
+                        else if(IsWheel)
+                        {
+                            gObj.transform.LookAt(transform);
+                        }
 
                         //c1 = transform.GetComponent<Renderer>().material.color;
                         //c2 = new Color(x, y, z);
@@ -249,6 +269,7 @@ public class DataNode : MonoBehaviour
 
     int ProcessFiles(DirectoryInfo diTop, int i)
     {
+        fsscript = transform.gameObject.GetComponent<MyFileSystem>();
         int samples = diTop.GetDirectories("*").Length;
         float rnd = 1;
         bool randomize = true;
