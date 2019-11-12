@@ -7,7 +7,7 @@ public class MouseClick : MonoBehaviour
     private float clicks = 0;
     private float prevClickTime = 0;
 
-    private void Update()
+    private void OnMouseOver()
     {
         if (Input.GetMouseButtonDown(0))
         {
