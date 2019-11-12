@@ -1,37 +1,36 @@
 ﻿using UnityEngine;
-using UnityEngine.EventSystems;
 
-[System.Serializable]
-public class MouseClick : MonoBehaviour, IPointerDownHandler
+public class MouseClick : MonoBehaviour
 {
-    float clicks = 0;
-    float clickStart = 0;
-    const float delay = 0.5f;
-    
-    public void OnPointerDown(PointerEventData data)
+    public float delay = 0.5f;
+
+    private float clicks = 0;
+    private float prevClickTime = 0;
+
+    private void Update()
     {
-        clicks++;
-        if(clicks == 1)
+        if (Input.GetMouseButtonDown(0))
         {
-            clickStart = Time.time;
+            Debug.Log("Left Click");
+
+            float deltaTime = Time.time - prevClickTime;
+            if(deltaTime <= delay)
+            {
+                clicks = 0;
+                Debug.Log("Double Click");   
+            }
+            else if(clicks == 1)
+            {
+                clicks = 0;
+                Debug.Log("Single Click");
+            }
+
+            prevClickTime = Time.time;
+            clicks++;
         }
-        if(clicks > 1 && (Time.time - clickStart) <= delay)
+        if (Input.GetMouseButtonDown(1))
         {
-            clicks = 0;
-            clickStart = 0;
-            Debug.Log("Double click detected");
-        } 
-        else if(clicks == 1 && (Time.time - clickStart) > delay)
-        {
-            clicks = 0;
-            clickStart = 0;
-            Debug.Log("Single Click");
-        }
-        else if(Time.time - clickStart > delay)
-        {
-            clicks = 0;
-            clickStart = 0;
-            Debug.Log("Reset click");
+            Debug.Log("Right Click");
         }
     }
 }
