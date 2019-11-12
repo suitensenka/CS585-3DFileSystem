@@ -25,7 +25,7 @@ public class MyFileSystem : MonoBehaviour
 
     public bool IsWheel = false;
     public bool IsHelix = true;
-    private float wheelY;
+    private float wheelY, defaultRadius;
 
     public DataNode currentSelectedNode;
 
@@ -33,6 +33,7 @@ public class MyFileSystem : MonoBehaviour
     void Start()
     {
         wheelY = transform.position.y - 5f;
+        defaultRadius = radius;
         txtSelectedNode.text = "";
         txtHoveredOverNode.text = "";
 
@@ -189,6 +190,9 @@ public class MyFileSystem : MonoBehaviour
             currentSelectedNode = currentSelectedNode.ParentObject.transform.GetComponent<DataNode>();
 
             transform.position = currentSelectedNode.transform.position;
+
+            SwitchHelix();
+            SwitchWheel();
         }
     }
 
@@ -215,6 +219,7 @@ public class MyFileSystem : MonoBehaviour
                     Vector3 newRotate = new Vector3(transform.position.x, child.transform.position.y, transform.position.z);
                     child.transform.LookAt(newRotate);
                 }
+                radius = defaultRadius;
             }
             catch
             {
@@ -255,6 +260,7 @@ public class MyFileSystem : MonoBehaviour
                     //Vector3 newRotate = new Vector3(transform.position.x, child.transform.position.y, transform.position.z);
                     child.transform.LookAt(transform);
                 }
+                radius = defaultRadius;
             }
             catch
             {
