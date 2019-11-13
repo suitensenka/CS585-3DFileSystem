@@ -144,6 +144,7 @@ public class DataNode : MonoBehaviour
                         else if(IsWheel)
                         {
                             gObj.transform.LookAt(transform);
+                            textName.transform.LookAt(transform);
                         }
 
 

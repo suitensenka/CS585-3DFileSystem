@@ -166,6 +166,7 @@ public class MyFileSystem : MonoBehaviour
                             currentSelectedNode.transform.GetChild(0).gameObject.SetActive(true);
                         }
                     }
+                    
 
                 }
             }
@@ -191,8 +192,10 @@ public class MyFileSystem : MonoBehaviour
 
             transform.position = currentSelectedNode.transform.position;
 
-            SwitchHelix();
-            SwitchWheel();
+            if(IsHelix)
+                SwitchHelix();
+            else
+                SwitchWheel();
         }
     }
 
@@ -203,6 +206,22 @@ public class MyFileSystem : MonoBehaviour
         {
             IsHelix = true;
             IsWheel = false;
+
+            transform.position = currentSelectedNode.transform.position; //restore the position.
+            //get first children object in hideexpanded if it is not an empty folder.
+            try{
+                Transform childObj = currentSelectedNode.transform.GetChild(0).GetChild(0); //Try to get the first child. This will throw an exception if there isn't one. i.e. empty.
+                Vector3 newLookAt = new Vector3(childObj.position.x, transform.position.y, transform.position.z);
+                transform.LookAt(newLookAt);
+            }
+            catch
+            {
+                transform.rotation = Quaternion.Euler(0f,0f,0f);
+            }
+
+
+            //Vector3 newLookAt = new Vector3(currentSelectedNode.transform.position.x, transform.postion.y, transform.position.z);
+            //transform.LookAt(newLookAt);
 
             int i = 0;
             try
