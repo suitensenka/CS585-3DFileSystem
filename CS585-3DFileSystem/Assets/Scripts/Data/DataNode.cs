@@ -15,6 +15,9 @@ public class DataNode : MonoBehaviour
     public bool IsFolder = false;
     public bool IsDrive = false;
 
+    public bool IsFile = false;
+    public bool hidden = false, system = false, readOnly = false;
+
     public bool IsSelected = false;
     public bool IsExpanded = false;
 
@@ -23,7 +26,7 @@ public class DataNode : MonoBehaviour
 
     public Vector3 CurrentPosition; //Store the current position to replace it into the view later
     public GameObject ParentObject; //cache the parent object so we can move it back
-    
+
 
     //drive.AvailableFreeSpace; 
     //drive.TotalFreeSpace;
@@ -89,17 +92,6 @@ public class DataNode : MonoBehaviour
                 {
                     try
                     {
-                        /*
-                        float y = ((i * offsetFilres) - 1) + (offsetFilres / 2);
-                        float r = Mathf.Sqrt(1 - Mathf.Pow(y, 2));
-
-                        float phi = ((i + rnd) % fileNum) * increment;
-
-                        float x = Mathf.Cos(phi) * r;
-                        float z = Mathf.Sin(phi) * r;
-
-                        var gObj = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                        gObj.transform.position = new Vector3(x + transform.position.x, y + transform.position.y, z + transform.position.z);*/
 
                         float x = radius * Mathf.Cos(degree);
                         float z = radius * Mathf.Sin(degree);
@@ -113,11 +105,11 @@ public class DataNode : MonoBehaviour
                         gObj.transform.localScale *= 0.1f;
 
                         gObj.transform.GetComponent<Renderer>().material.color = new Color(x, y, z);
-                        gObj.transform.GetComponent<Renderer>().material.SetColor("_EmissionColor", new Color(255, 0, 0));
+                        //gObj.transform.GetComponent<Renderer>().material.SetColor("_EmissionColor", new Color(255, 0, 0));
 
                         gObj.transform.SetParent(HideExpanded.transform);
                         gObj.name = fi.FullName;
-                        
+
 
                         gObj.AddComponent<DataNode>();
                         DataNode dn = gObj.GetComponent<DataNode>();
@@ -125,6 +117,25 @@ public class DataNode : MonoBehaviour
                         dn.Size = -1;
                         dn.FullName = fi.FullName;
                         dn.IsFolder = false;
+
+                        ///HANDLING FILES PERMISSION
+                        FileAttributes fileAttr = fi.Attributes;
+                        dn.hidden = ((fileAttr & FileAttributes.Hidden) == FileAttributes.Hidden) ? true : false;
+                        dn.system = ((fileAttr & FileAttributes.System) == FileAttributes.System) ? true : false;
+                        dn.readOnly = ((fileAttr & FileAttributes.ReadOnly) == FileAttributes.ReadOnly) ? true : false;
+
+                        if (dn.hidden)
+                        {
+                            gObj.transform.GetComponent<Renderer>().material.SetColor("_EmissionColor", Color.black);
+                        }
+                        if (dn.system)
+                        {
+                            gObj.transform.GetComponent<Renderer>().material.SetColor("_EmissionColor", Color.red);
+                        }
+                        if (dn.readOnly)
+                        {
+                            gObj.transform.GetComponent<Renderer>().material.SetColor("_EmissionColor", Color.green);
+                        }
 
                         //Storing information later to restore their original position in the helix
                         dn.ParentObject = transform.gameObject;
@@ -135,13 +146,13 @@ public class DataNode : MonoBehaviour
                         textName.transform.SetParent(gObj.transform);
                         textName.transform.localScale *= 0.2f;
 
-                        if(IsHelix)
+                        if (IsHelix)
                         {
-                            Vector3 newRotate = new Vector3(transform.position.x, gObj.transform.position.y, transform.position.z );
+                            Vector3 newRotate = new Vector3(transform.position.x, gObj.transform.position.y, transform.position.z);
                             gObj.transform.LookAt(newRotate);
                         }
 
-                        else if(IsWheel)
+                        else if (IsWheel)
                         {
                             gObj.transform.LookAt(transform);
                             textName.transform.LookAt(transform);
@@ -184,11 +195,11 @@ public class DataNode : MonoBehaviour
                         float x = radius * Mathf.Cos(degree);
                         float z = radius * Mathf.Sin(degree);
                         float y = transform.position.y;
-   
+
                         degree = degree + degreeModifier;
 
                         var gObj = Instantiate(DoorPrefab); //Need to normalize the object in blender or whatever program before importing
-                        
+
                         //var gObj = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                         gObj.transform.position = new Vector3(x + transform.position.x, y + heightModifier * i, z + transform.position.z);
 
@@ -217,6 +228,25 @@ public class DataNode : MonoBehaviour
                         dn.FullName = di.FullName;
                         dn.IsFolder = true;
 
+                        //HANDLING FILE PERMISSION
+                        FileAttributes dirAttr = di.Attributes;
+                        dn.hidden = ((dirAttr & FileAttributes.Hidden) == FileAttributes.Hidden) ? true : false;
+                        dn.system = ((dirAttr & FileAttributes.System) == FileAttributes.System) ? true : false;
+                        dn.readOnly = ((dirAttr & FileAttributes.ReadOnly) == FileAttributes.ReadOnly) ? true : false;
+
+                        if (dn.hidden)
+                        {
+                            gObj.transform.GetComponent<Renderer>().material.SetColor("_EmissionColor", Color.black);
+                        }
+                        if (dn.system)
+                        {
+                            gObj.transform.GetComponent<Renderer>().material.SetColor("_EmissionColor", Color.red);
+                        }
+                        if (dn.readOnly)
+                        {
+                            gObj.transform.GetComponent<Renderer>().material.SetColor("_EmissionColor", Color.green);
+                        }
+
                         //Storing information later to restore their original position in the helix
                         dn.ParentObject = transform.gameObject;
                         dn.CurrentPosition = gObj.transform.position;
@@ -225,15 +255,15 @@ public class DataNode : MonoBehaviour
                         textName.GetComponent<TextMeshPro>().text = dn.Name;
                         textName.transform.SetParent(gObj.transform);
 
-                        
 
-                        if(IsHelix)
+
+                        if (IsHelix)
                         {
-                            Vector3 newRotate = new Vector3(transform.position.x, gObj.transform.position.y, transform.position.z );
+                            Vector3 newRotate = new Vector3(transform.position.x, gObj.transform.position.y, transform.position.z);
                             gObj.transform.LookAt(newRotate);
                         }
 
-                        else if(IsWheel)
+                        else if (IsWheel)
                         {
                             gObj.transform.LookAt(transform);
                         }
