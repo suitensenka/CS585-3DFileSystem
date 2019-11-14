@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
 using TMPro;
 
@@ -99,6 +100,10 @@ public class MyFileSystem : MonoBehaviour
         // Check to see if the Left Mouse Button was clicked
         if (Input.GetMouseButtonDown(0))
         {
+            if(EventSystem.current.IsPointerOverGameObject())
+            {
+                return; //return if we are clicking on UI.
+            }
 
             // Create a raycase from the screen-space into World Space, store the data in hitInfo Object
             bool hit = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo);
