@@ -142,7 +142,9 @@ public class DataNode : MonoBehaviour
                         dn.CurrentPosition = gObj.transform.position;
 
                         var textName = Instantiate(TextMeshProPrefab, gObj.transform);
-                        textName.transform.GetChild(0).GetComponent<TextMeshPro>().text = dn.Name;
+
+                        textName.GetComponent<TextMeshPro>().text = dn.Name;
+
                         textName.transform.SetParent(gObj.transform);
                         textName.transform.localScale *= 0.2f;
 
@@ -252,7 +254,9 @@ public class DataNode : MonoBehaviour
                         dn.CurrentPosition = gObj.transform.position;
 
                         var textName = Instantiate(TextMeshProPrefab, gObj.transform);
-                        textName.transform.GetChild(0).GetComponent<TextMeshPro>().text = dn.Name;
+
+                        textName.GetComponent<TextMeshPro>().text = dn.Name;
+
                         textName.transform.SetParent(gObj.transform);
 
 
