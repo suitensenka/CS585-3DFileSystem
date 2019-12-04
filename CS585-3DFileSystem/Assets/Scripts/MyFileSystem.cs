@@ -21,7 +21,8 @@ public class MyFileSystem : MonoBehaviour
 
     //PREFABS
     public GameObject DoorPrefab, TextMeshProPrefab;
-    public float degree, degreeModifier, radius, heightModifier; //control how large the helix is.
+
+    public float degree = 0f, degreeModifier = 0.2f, radius = 1.5f, heightModifier = 0.05f; //control how large the helix is.
 
 
     public bool IsWheel = false;
@@ -29,6 +30,9 @@ public class MyFileSystem : MonoBehaviour
     private float wheelY, defaultRadius;
 
     public DataNode currentSelectedNode;
+
+    public float delay = 0.5f;
+    private float clicks = 0, prevClickTime = 0;
 
     // Start is called before the first frame update
     void Start()
@@ -68,7 +72,9 @@ public class MyFileSystem : MonoBehaviour
 
             var textName = Instantiate(TextMeshProPrefab, gObj.transform);
             textName.transform.localScale = new Vector3(1f, 1f, 1f);
+
             textName.GetComponent<TextMeshPro>().text = dn.Name;
+
             textName.transform.SetParent(gObj.transform);
 
             index += 3f;
@@ -100,6 +106,7 @@ public class MyFileSystem : MonoBehaviour
         // Check to see if the Left Mouse Button was clicked
         if (Input.GetMouseButtonDown(0))
         {
+
             if(EventSystem.current.IsPointerOverGameObject())
             {
                 return; //return if we are clicking on UI.
@@ -197,6 +204,7 @@ public class MyFileSystem : MonoBehaviour
 
             transform.position = currentSelectedNode.transform.position;
 
+
             if(IsHelix)
                 SwitchHelix();
             else
@@ -214,14 +222,19 @@ public class MyFileSystem : MonoBehaviour
 
             transform.position = currentSelectedNode.transform.position; //restore the position.
             //get first children object in hideexpanded if it is not an empty folder.
-            try{
+
+            try
+            {
+
                 Transform childObj = currentSelectedNode.transform.GetChild(0).GetChild(0); //Try to get the first child. This will throw an exception if there isn't one. i.e. empty.
                 Vector3 newLookAt = new Vector3(childObj.position.x, transform.position.y, transform.position.z);
                 transform.LookAt(newLookAt);
             }
             catch
             {
-                transform.rotation = Quaternion.Euler(0f,0f,0f);
+
+                transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+
             }
 
 
