@@ -36,6 +36,7 @@ public class FileSystem : MonoBehaviour
     private float clicks = 0, prevClickTime = 0;
     private RaycastHit previousHit;
     private bool prevHit;
+    private int ? prevHitID = null;
 
     public List<GameObject> Drives;
     public bool canClick = false;
@@ -144,11 +145,13 @@ public class FileSystem : MonoBehaviour
             if (deltaTime <= delay)
             {
                 clicks = 0;
-                //Debug.Log("Double Clicked");
+                Debug.Log("Double Clicked");
 
                 // Create a raycase from the screen-space into World Space, store the data in hitInfo Object
                 bool hit = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo);
-                if (hit)
+
+                int hitID = hitInfo.collider.gameObject.GetInstanceID();
+                if (hit && (prevHitID == hitID))
                 {
                     if (!InactiveFolder.activeSelf)
                         InactiveFolder.SetActive(false);
@@ -260,6 +263,8 @@ public class FileSystem : MonoBehaviour
                     //Debug.Log(hitInfo.transform.name);
                     MyDataNode dn = hitInfo.transform.GetComponent<MyDataNode>();
                     txtSelectedNode.text = $"{dn.Name}";
+                    
+                    prevHitID = hitInfo.collider.gameObject.GetInstanceID();
 
                     if (prevHit == false)
                     {
@@ -283,17 +288,23 @@ public class FileSystem : MonoBehaviour
                 }
                 else
                 {
+                    prevHitID = null;
                     if(prevHit != false)
                     {
                         previousHit.transform.gameObject.GetComponent<MeshRenderer>().materials[1].SetFloat("_Outline", 0f);
                     }
                     txtSelectedNode.text = $"";
                 }
-                //Debug.Log("Single Click");
+                Debug.Log("Single Click");
 
             }
-            prevClickTime = Time.time;
-            clicks++;
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo))
+            {
+                prevHitID = hitInfo.collider.gameObject.GetInstanceID();
+                prevClickTime = Time.time;
+                clicks++;
+
+            }
 
         }
 
