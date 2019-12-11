@@ -36,6 +36,7 @@ public class FileSystem : MonoBehaviour
     private float clicks = 0, prevClickTime = 0;
     private RaycastHit previousHit;
     private bool prevHit;
+    private int ? prevHitID = null;
 
     public List<GameObject> Drives;
     public bool canClick = false;
@@ -102,14 +103,7 @@ public class FileSystem : MonoBehaviour
             Drives.Add(gObj);
             index += 3f;
         }
-
-        var gObj2 = Instantiate(Drives[0]);
-        //gObj2.GetComponent<MyDataNode>().Name = "TEST";
-        //gObj2.name = "TEST";
-        gObj2.transform.position = new Vector3(0f, index + 1f, 0f);
-
-        Drives.Add(gObj2);
-
+        
         Vector3 endVector = new Vector3(transform.position.x, Drives[Drives.Count - 1].transform.position.y, transform.position.z);
 
         StartCoroutine(GetComponent<MyCameraControl>().ScanDrives(transform.position, endVector, 5.0f));
@@ -141,6 +135,7 @@ public class FileSystem : MonoBehaviour
         // Check to see if the Left Mouse Button was clicked
         if (Input.GetMouseButtonDown(0) && canClick)
         {
+            Debug.Log("Click");
             if (EventSystem.current.IsPointerOverGameObject())
             {
                 return; //return if we are clicking on UI.
@@ -151,12 +146,19 @@ public class FileSystem : MonoBehaviour
             if (deltaTime <= delay)
             {
                 clicks = 0;
-                //Debug.Log("Double Clicked");
+                Debug.Log("Double Clicked");
 
                 // Create a raycase from the screen-space into World Space, store the data in hitInfo Object
                 bool hit = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo);
+                int? hitID = null;
                 if (hit)
                 {
+                    hitID = hitInfo.collider.gameObject.GetInstanceID();
+                }
+                 
+                if (hit && (prevHitID == hitID))
+                {
+                    prevHitID = null; // Reset 
                     if (!InactiveFolder.activeSelf)
                         InactiveFolder.SetActive(false);
 
@@ -264,9 +266,11 @@ public class FileSystem : MonoBehaviour
                 bool hit = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo);
                 if (hit)
                 {
-                    //Debug.Log(hitInfo.transform.name);
+                    Debug.Log(hitInfo.transform.name);
                     MyDataNode dn = hitInfo.transform.GetComponent<MyDataNode>();
                     txtSelectedNode.text = $"{dn.Name}";
+                    
+                    prevHitID = hitInfo.collider.gameObject.GetInstanceID();
 
                     if (prevHit == false)
                     {
@@ -290,17 +294,29 @@ public class FileSystem : MonoBehaviour
                 }
                 else
                 {
+                    Debug.Log("No Hit");
+                    prevHitID = null;
                     if(prevHit != false)
                     {
                         previousHit.transform.gameObject.GetComponent<MeshRenderer>().materials[1].SetFloat("_Outline", 0f);
                     }
                     txtSelectedNode.text = $"";
                 }
-                //Debug.Log("Single Click");
+                Debug.Log("Single Click");
 
+            }
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo))
+            {
+                prevHitID = hitInfo.collider.gameObject.GetInstanceID();
+                
+            }
+            else
+            {
+                prevHitID = null;
             }
             prevClickTime = Time.time;
             clicks++;
+            Debug.Log("Click++");
 
         }
 

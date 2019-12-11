@@ -135,6 +135,7 @@ public class FileSystem : MonoBehaviour
         // Check to see if the Left Mouse Button was clicked
         if (Input.GetMouseButtonDown(0) && canClick)
         {
+            Debug.Log("Click");
             if (EventSystem.current.IsPointerOverGameObject())
             {
                 return; //return if we are clicking on UI.
@@ -149,10 +150,15 @@ public class FileSystem : MonoBehaviour
 
                 // Create a raycase from the screen-space into World Space, store the data in hitInfo Object
                 bool hit = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo);
-
-                int hitID = hitInfo.collider.gameObject.GetInstanceID();
+                int? hitID = null;
+                if (hit)
+                {
+                    hitID = hitInfo.collider.gameObject.GetInstanceID();
+                }
+                 
                 if (hit && (prevHitID == hitID))
                 {
+                    prevHitID = null; // Reset 
                     if (!InactiveFolder.activeSelf)
                         InactiveFolder.SetActive(false);
 
@@ -260,7 +266,7 @@ public class FileSystem : MonoBehaviour
                 bool hit = Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo);
                 if (hit)
                 {
-                    //Debug.Log(hitInfo.transform.name);
+                    Debug.Log(hitInfo.transform.name);
                     MyDataNode dn = hitInfo.transform.GetComponent<MyDataNode>();
                     txtSelectedNode.text = $"{dn.Name}";
                     
@@ -288,6 +294,7 @@ public class FileSystem : MonoBehaviour
                 }
                 else
                 {
+                    Debug.Log("No Hit");
                     prevHitID = null;
                     if(prevHit != false)
                     {
@@ -301,10 +308,15 @@ public class FileSystem : MonoBehaviour
             if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hitInfo))
             {
                 prevHitID = hitInfo.collider.gameObject.GetInstanceID();
-                prevClickTime = Time.time;
-                clicks++;
-
+                
             }
+            else
+            {
+                prevHitID = null;
+            }
+            prevClickTime = Time.time;
+            clicks++;
+            Debug.Log("Click++");
 
         }
 
